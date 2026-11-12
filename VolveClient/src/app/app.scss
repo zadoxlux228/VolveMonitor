@@ -1,0 +1,21 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.shell-body {
+  display: flex;
+  flex: 1;
+}
+
+.shell-content {
+  flex: 1;
+  padding: 24px 32px;
+  background: #f4f6f8;
+}
+
+.shell-auth {
+  flex: 1;
+  background: linear-gradient(135deg, #0d2b45 0%, #14486e 60%, #1976d2 100%);
+}

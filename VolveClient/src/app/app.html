@@ -1,0 +1,16 @@
+<div class="shell">
+  <app-header />
+  @if (auth.isAuthenticated()) {
+    <div class="shell-body">
+      <app-menu />
+      <main class="shell-content">
+        <router-outlet />
+      </main>
+    </div>
+  } @else {
+    <main class="shell-auth">
+      <router-outlet />
+    </main>
+  }
+  <app-footer />
+</div>

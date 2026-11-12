@@ -1,0 +1,24 @@
+# ASP.NET Core
+bin/
+obj/
+*.user
+*.suo
+.vs/
+appsettings.Development.json
+
+# Angular / Node
+VolveClient/node_modules/
+VolveClient/dist/
+VolveClient/.angular/
+VolveClient/.angular/cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini

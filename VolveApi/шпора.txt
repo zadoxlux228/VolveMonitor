@@ -1,0 +1,111 @@
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+{
+  "username": "user",
+  "password": "user123"
+}
+
+
+{
+  "fieldCode": "TEST-ADMIN-01",
+  "name": "Admin Test Field",
+  "region": "North Sea",
+  "startDate": "2026-01-01T00:00:00Z"
+}
+POST /api/ProductionRecords
+{
+  "productionDate": "2023-10-25T00:00:00Z",
+  "onStreamHours": 24,
+  "downholePressure": 250,
+  "downholeTemperature": 95,
+  "oilVolume": 100,
+  "gasVolume": 300,
+  "waterVolume": 50,
+  "waterInjectionVolume": 0,
+  "wellId": 1,
+  "downtimeReason": 0
+}
+POST /api/ProductionRecords будущая дата
+{
+  "productionDate": "2030-01-01T00:00:00Z",
+  "onStreamHours": 24,
+  "downholePressure": 250,
+  "downholeTemperature": 95,
+  "oilVolume": 100,
+  "gasVolume": 300,
+  "waterVolume": 50,
+  "waterInjectionVolume": 0,
+  "wellId": 1,
+  "downtimeReason": 0
+}
+POST /api/ProductionRecords нереалистичное давление
+{
+  "productionDate": "2023-01-01T00:00:00Z",
+  "onStreamHours": 24,
+  "downholePressure": 600,
+  "downholeTemperature": 95,
+  "oilVolume": 100,
+  "gasVolume": 300,
+  "waterVolume": 50,
+  "waterInjectionVolume": 0,
+  "wellId": 1,
+  "downtimeReason": 0
+}
+POST /api/ProductionRecords отрицательный объем 
+{
+  "productionDate": "2023-01-01T00:00:00Z",
+  "onStreamHours": 24,
+  "downholePressure": 250,
+  "downholeTemperature": 95,
+  "oilVolume": -10,
+  "gasVolume": 300,
+  "waterVolume": 50,
+  "waterInjectionVolume": 0,
+  "wellId": 1,
+  "downtimeReason": 0
+}
+POST /api/Wells нагнетательная скважина с нефтью
+{
+  "wellCode": "WI-001",
+  "wellName": "Injection Well",
+  "wellType": "WI",
+  "facilityName": "Volve",
+  "firstProductionDate": "2008-05-01T00:00:00Z",
+  "fieldId": 1,
+  "status": 0
+}
+POST /api/ProductionRecords
+{
+  "productionDate": "2023-02-01T00:00:00Z",
+  "onStreamHours": 24,
+  "downholePressure": 250,
+  "downholeTemperature": 95,
+  "oilVolume": 50,
+  "gasVolume": 0,
+  "waterVolume": 0,
+  "waterInjectionVolume": 100,
+  "wellId": 2,
+  "downtimeReason": 0
+}
+PUT /api/Wells/1 воскрешение
+{
+  "wellCode": "15/9-F-1 C",
+  "wellName": "Test Well",
+  "wellType": "OP",
+  "facilityName": "Volve",
+  "firstProductionDate": "2008-05-01T00:00:00Z",
+  "fieldId": 1,
+  "status": 4
+}
+{
+  "wellCode": "15/9-F-1 C",
+  "wellName": "Test Well",
+  "wellType": "OP",
+  "facilityName": "Volve",
+  "firstProductionDate": "2008-05-01T00:00:00Z",
+  "fieldId": 1,
+  "status": 0
+}
