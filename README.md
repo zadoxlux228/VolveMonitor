@@ -93,11 +93,3 @@ ng serve
 Приложение: http://localhost:4200
 Учётные данные
 Admin: admin / admin123
-
-## Шаг 5. Инициализируй git и запушь
-
-```powershell
-cd "C:\Users\lisal\OneDrive\Рабочий стол\7 семестр\кросс"
-git init
-git add .
-git commit -m "Initial commit: VolveApi + VolveClient"
