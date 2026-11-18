@@ -28,8 +28,14 @@ import { Field, SaveWellDto, WELL_STATUS_LABELS, WellStatus } from '../core/mode
         @if (loading()) {
           <div class="center"><mat-spinner></mat-spinner></div>
         } @else {
+          @if (isEdit()) {
+            <p class="note-info">
+              Код, дата начала добычи и месторождение не изменяются при редактировании.
+            </p>
+          }
+
           @if (abandonedLocked()) {
-            <p class="note">
+            <p class="note-warn">
               Скважина ликвидирована: статус изменить нельзя.
             </p>
           }
@@ -132,7 +138,15 @@ import { Field, SaveWellDto, WELL_STATUS_LABELS, WellStatus } from '../core/mode
     .half { flex: 1; margin-bottom: 8px; }
     .center { display: flex; justify-content: center; padding: 32px; }
     .actions { display: flex; gap: 12px; margin-top: 8px; }
-    .note {
+    .note-info {
+      background: #e3f0fa;
+      color: #0d2b45;
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin: 0 0 16px;
+      font-size: 14px;
+    }
+    .note-warn {
       background: #fdecea;
       color: #b71c1c;
       border-radius: 6px;
@@ -158,6 +172,7 @@ export class WellForm implements OnInit {
   private router = inject(Router);
 
   title = signal('Новая скважина');
+  isEdit = signal(false);
   loading = signal(true);
   saving = signal(false);
   errorMessage = signal('');
@@ -205,6 +220,7 @@ export class WellForm implements OnInit {
     }
 
     this.editId = Number(id);
+    this.isEdit.set(true);
     this.title.set('Редактирование скважины');
 
     this.wellService.getById(this.editId).subscribe({
@@ -218,6 +234,11 @@ export class WellForm implements OnInit {
           fieldId: well.fieldId,
           status: well.status
         });
+
+        this.form.controls.wellCode.disable();
+        this.form.controls.firstProductionDate.disable();
+        this.form.controls.fieldId.disable();
+
         if (well.status === WellStatus.Abandoned) {
           this.form.controls.status.disable();
           this.abandonedLocked.set(true);

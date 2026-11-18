@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -48,13 +48,13 @@ import { AuthService } from '../core/auth.service';
             }
           </mat-form-field>
 
-          @if (errorMessage) {
-            <div class="server-error">{{ errorMessage }}</div>
+          @if (errorMessage()) {
+            <div class="server-error">{{ errorMessage() }}</div>
           }
 
           <button mat-flat-button color="primary" class="full submit"
-                  type="submit" [disabled]="form.invalid || loading">
-            @if (loading) {
+                  type="submit" [disabled]="form.invalid || loading()">
+            @if (loading()) {
               <mat-spinner diameter="20"></mat-spinner>
             } @else {
               Войти
@@ -94,8 +94,8 @@ export class Login {
   private router = inject(Router);
 
   hide = true;
-  loading = false;
-  errorMessage = '';
+  loading = signal(false);
+  errorMessage = signal('');
 
   form = this.fb.nonNullable.group({
     username: ['', Validators.required],
@@ -104,19 +104,18 @@ export class Login {
 
   submit(): void {
     if (this.form.invalid) return;
-    this.loading = true;
-    this.errorMessage = '';
+
+    this.loading.set(true);
+    this.errorMessage.set('');
 
     this.auth.login(this.form.getRawValue()).subscribe({
       next: () => this.router.navigate(['/dashboard']),
       error: err => {
-        this.loading = false;
-        this.errorMessage =
-          err.error?.error ??
+        this.loading.set(false);
+        const msg = err.error?.error ??
           err.error?.message ??
-          (err.status === 401
-            ? 'Неверное имя пользователя или пароль.'
-            : 'Сервер недоступен. Проверьте, что VolveApi запущен.');
+          (err.status === 401 ? 'Неверное имя пользователя или пароль.' : 'Сервер недоступен.');
+        this.errorMessage.set(msg);
       }
     });
   }

@@ -52,6 +52,46 @@ import { DOWNTIME_LABELS, DowntimeReason, ProductionRecord } from '../core/model
       </div>
     </div>
 
+    <mat-card class="info-panel">
+      <button type="button" class="info-toggle" (click)="infoOpen.set(!infoOpen())">
+        <mat-icon class="info-icon">report_problem</mat-icon>
+        <span class="info-title">Что считается аномалией</span>
+        <span class="info-chip" [class.chip-hot]="anomalyCount() > 0">
+          аномальных: {{ anomalyCount() }} из {{ records().length }}
+        </span>
+        <mat-icon class="info-chevron" [class.open]="infoOpen()">expand_more</mat-icon>
+      </button>
+      <div class="info-body" [class.open]="infoOpen()">
+        <div class="info-inner">
+          <div class="rule-row">
+            <span class="rule-name">Забойное давление</span>
+            <span class="rule-value">&gt; 300 bar</span>
+          </div>
+          <div class="rule-row">
+            <span class="rule-name">Забойная температура</span>
+            <span class="rule-value">&gt; 110 °C</span>
+          </div>
+          <p class="rule-note">
+            Достаточно одного условия при заполненном значении. Такие значения остаются
+            в допустимых диапазонах ввода (0–500 bar и −20–200 °C), но превышают рабочие
+            пороги — замер помечается сервером и требует проверки инженером.
+          </p>
+          <div class="rule-row">
+            <span class="rule-name">Обводнённость, %</span>
+            <span class="rule-value">Вода ÷ (Нефть + Вода) × 100</span>
+          </div>
+          <div class="rule-row">
+            <span class="rule-name">Эффективность</span>
+            <span class="rule-value">Нефть ÷ Часы работы</span>
+          </div>
+          <p class="rule-note">
+            Округление до двух знаков. При нулевой жидкости обводнённость равна 0,
+            при нулевых часах работы эффективность равна 0.
+          </p>
+        </div>
+      </div>
+    </mat-card>
+
     <div class="filters">
       <mat-form-field appearance="outline" class="search">
         <mat-label>Поиск</mat-label>
@@ -111,17 +151,24 @@ import { DOWNTIME_LABELS, DowntimeReason, ProductionRecord } from '../core/model
             <td mat-cell *matCellDef="let r">{{ r.waterVolume | number:'1.2-2' }}</td>
           </ng-container>
           <ng-container matColumnDef="waterCut">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header="waterCut">Обводнённость, %</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header="waterCut">
+              <span matTooltip="Вода ÷ (Нефть + Вода) × 100, округление до 2 знаков">Обводнённость, %</span>
+            </th>
             <td mat-cell *matCellDef="let r">{{ r.waterCut | number:'1.2-2' }}</td>
           </ng-container>
           <ng-container matColumnDef="efficiency">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header="efficiency">Эффективность</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header="efficiency">
+              <span matTooltip="Нефть ÷ Часы работы, округление до 2 знаков">Эффективность</span>
+            </th>
             <td mat-cell *matCellDef="let r">{{ r.efficiency | number:'1.2-2' }}</td>
           </ng-container>
           <ng-container matColumnDef="hasAnomaly">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header="hasAnomaly">Аномалия</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header="hasAnomaly">
+              <span [matTooltip]="anomalyRule">Аномалия</span>
+            </th>
             <td mat-cell *matCellDef="let r">
-              <span class="badge" [class.badge-bad]="r.hasAnomaly" [class.badge-ok]="!r.hasAnomaly">
+              <span class="badge" [class.badge-bad]="r.hasAnomaly" [class.badge-ok]="!r.hasAnomaly"
+                    [matTooltip]="anomalyRule">
                 {{ r.hasAnomaly ? 'Да' : 'Нет' }}
               </span>
             </td>
@@ -164,11 +211,24 @@ import { DOWNTIME_LABELS, DowntimeReason, ProductionRecord } from '../core/model
               <div class="card-row"><span>Нефть</span><b>{{ r.oilVolume | number:'1.2-2' }}</b></div>
               <div class="card-row"><span>Газ</span><b>{{ r.gasVolume | number:'1.2-2' }}</b></div>
               <div class="card-row"><span>Вода</span><b>{{ r.waterVolume | number:'1.2-2' }}</b></div>
+              <div class="card-row">
+                <span>Давление, bar</span>
+                <b [class.value-anomaly]="r.downholePressure != null && r.downholePressure > 300">
+                  {{ r.downholePressure != null ? (r.downholePressure | number:'1.0-2') : '—' }}
+                </b>
+              </div>
+              <div class="card-row">
+                <span>Температура, °C</span>
+                <b [class.value-anomaly]="r.downholeTemperature != null && r.downholeTemperature > 110">
+                  {{ r.downholeTemperature != null ? (r.downholeTemperature | number:'1.0-2') : '—' }}
+                </b>
+              </div>
               <div class="card-row"><span>Обводнённость</span><b>{{ r.waterCut | number:'1.2-2' }}%</b></div>
               <div class="card-row"><span>Эффективность</span><b>{{ r.efficiency | number:'1.2-2' }}</b></div>
               <div class="card-row">
                 <span>Аномалия</span>
-                <span class="badge" [class.badge-bad]="r.hasAnomaly" [class.badge-ok]="!r.hasAnomaly">
+                <span class="badge" [class.badge-bad]="r.hasAnomaly" [class.badge-ok]="!r.hasAnomaly"
+                      [matTooltip]="anomalyRule">
                   {{ r.hasAnomaly ? 'Да' : 'Нет' }}
                 </span>
               </div>
@@ -188,6 +248,10 @@ import { DOWNTIME_LABELS, DowntimeReason, ProductionRecord } from '../core/model
     }
   `,
   styles: [`
+    :host {
+      display: block;
+      contain: inline-size;
+    }
     .page-head {
       display: flex;
       justify-content: space-between;
@@ -199,18 +263,79 @@ import { DOWNTIME_LABELS, DowntimeReason, ProductionRecord } from '../core/model
     h1 { margin: 0 0 4px; }
     .subtitle { color: #607d8b; margin: 0; }
     .head-actions { display: flex; gap: 12px; align-items: center; }
+    .info-panel {
+      margin-bottom: 16px;
+      border-left: 4px solid #b71c1c;
+      overflow: hidden;
+    }
+    .info-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 12px 16px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font: inherit;
+      color: #0d2b45;
+      text-align: left;
+      transition: background .2s ease;
+    }
+    .info-toggle:hover { background: #fdecea; }
+    .info-icon { color: #b71c1c; }
+    .info-title { font-weight: 600; }
+    .info-chip {
+      margin-left: auto;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      background: #eceff1;
+      color: #607d8b;
+      white-space: nowrap;
+    }
+    .chip-hot { background: #fdecea; color: #b71c1c; font-weight: 600; }
+    .info-chevron { transition: transform .25s ease; color: #607d8b; }
+    .info-chevron.open { transform: rotate(180deg); }
+    .info-body {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows .28s ease;
+    }
+    .info-body.open { grid-template-rows: 1fr; }
+    .info-inner { overflow: hidden; padding: 0 16px; }
+    .info-body.open .info-inner { padding: 4px 16px 16px; }
+    .rule-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 7px 0;
+      border-bottom: 1px solid #eceff1;
+      font-size: 14px;
+    }
+    .rule-name { color: #607d8b; }
+    .rule-value { font-weight: 600; color: #0d2b45; }
+    .rule-note { margin: 10px 0; font-size: 13px; color: #607d8b; line-height: 1.5; }
     .filters { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
     .search { width: 280px; max-width: 100%; }
     .filter { width: 200px; }
     .center { display: flex; justify-content: center; padding: 48px; }
-    .panel { padding: 8px 16px 16px; overflow-x: auto; }
-    table { width: 100%; }
+    .panel {
+      padding: 8px 16px 16px;
+      overflow-x: auto;
+    }
+    .panel::-webkit-scrollbar { height: 10px; }
+    .panel::-webkit-scrollbar-track { background: #eceff1; border-radius: 5px; }
+    .panel::-webkit-scrollbar-thumb { background: #0d2b45; border-radius: 5px; }
+    .panel::-webkit-scrollbar-thumb:hover { background: #1976d2; }
+    table { width: 100%; min-width: 1240px; }
     .cards {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
       gap: 16px;
     }
-    .record-card { padding: 16px; }
+    .record-card { padding: 16px; transition: box-shadow .2s ease, transform .2s ease; }
+    .record-card:hover { box-shadow: 0 6px 18px rgba(13, 43, 69, .12); transform: translateY(-2px); }
     .anomaly-card { border: 2px solid #f44336; }
     .card-row {
       display: flex;
@@ -222,6 +347,7 @@ import { DOWNTIME_LABELS, DowntimeReason, ProductionRecord } from '../core/model
     }
     .card-row:last-child { border-bottom: none; }
     .card-row span:first-child { color: #607d8b; }
+    .value-anomaly { color: #b71c1c; }
     .badge {
       padding: 2px 10px;
       border-radius: 12px;
@@ -231,6 +357,11 @@ import { DOWNTIME_LABELS, DowntimeReason, ProductionRecord } from '../core/model
     .badge-bad { background: #fdecea; color: #b71c1c; }
     .empty { padding: 32px; text-align: center; color: #607d8b; }
     .error-card { padding: 24px; background: #fdecea; color: #b71c1c; }
+    @media (max-width: 640px) {
+      .filters { flex-direction: column; }
+      .search, .filter { width: 100%; }
+      .info-chip { display: none; }
+    }
   `]
 })
 export class ProductionRecords implements OnInit {
@@ -249,10 +380,14 @@ export class ProductionRecords implements OnInit {
   viewMode = signal<'table' | 'cards'>('table');
   loading = signal(true);
   error = signal(false);
+  infoOpen = signal(true);
 
   readonly DOWNTIME_LABELS = DOWNTIME_LABELS;
+  readonly anomalyRule = 'Аномалия: забойное давление > 300 bar или забойная температура > 110 °C';
 
   columns = ['productionDate', 'wellName', 'fieldName', 'oilVolume', 'gasVolume', 'waterVolume', 'waterCut', 'efficiency', 'hasAnomaly', 'downtimeReason', 'actions'];
+
+  readonly anomalyCount = computed(() => this.records().filter(r => r.hasAnomaly).length);
 
   downtimeLabel(reason: number): string {
     return DOWNTIME_LABELS[reason as DowntimeReason] ?? '—';

@@ -31,20 +31,22 @@ import { CreateProductionRecordDto, DOWNTIME_LABELS, DowntimeReason, UpdateProdu
           <form [formGroup]="form" (ngSubmit)="submit()">
             @if (isEdit()) {
               <div class="info-row">
-                <mat-form-field appearance="outline" class="half">
+                <mat-form-field appearance="outline">
                   <mat-label>Дата замера</mat-label>
-                  <input matInput [value]="productionDateDisplay()" readonly>
+                  <input matInput [value]="productionDateDisplay()" disabled>
                 </mat-form-field>
-                <mat-form-field appearance="outline" class="half">
+                <mat-form-field appearance="outline">
                   <mat-label>Скважина</mat-label>
-                  <input matInput [value]="wellNameDisplay()" readonly>
+                  <input matInput [value]="wellNameDisplay()" disabled>
                 </mat-form-field>
               </div>
               <p class="note">Дата и скважина не изменяются при редактировании.</p>
             } @else {
-              <mat-form-field appearance="outline" class="full">
+              <div class="section">Дата и скважина</div>
+
+              <mat-form-field appearance="outline">
                 <mat-label>Дата замера</mat-label>
-                <input matInput type="date" formControlName="productionDate" placeholder="25.10.2023">
+                <input matInput type="date" formControlName="productionDate">
                 @if (form.controls.productionDate.hasError('required')) {
                   <mat-error>Укажите дату</mat-error>
                 }
@@ -53,7 +55,7 @@ import { CreateProductionRecordDto, DOWNTIME_LABELS, DowntimeReason, UpdateProdu
                 }
               </mat-form-field>
 
-              <mat-form-field appearance="outline" class="full">
+              <mat-form-field appearance="outline">
                 <mat-label>Скважина</mat-label>
                 <mat-select formControlName="wellId" (selectionChange)="onWellChange($event.value)">
                   @for (w of wells(); track w.id) {
@@ -66,10 +68,13 @@ import { CreateProductionRecordDto, DOWNTIME_LABELS, DowntimeReason, UpdateProdu
               </mat-form-field>
             }
 
+            <div class="section">Режим работы и датчики</div>
+
             <div class="row">
-              <mat-form-field appearance="outline" class="third">
+              <mat-form-field appearance="outline">
                 <mat-label>Часы работы</mat-label>
                 <input matInput type="number" formControlName="onStreamHours" placeholder="24">
+                <mat-hint>Меньше 24 — укажите простой</mat-hint>
                 @if (form.controls.onStreamHours.hasError('required')) {
                   <mat-error>Укажите часы</mat-error>
                 }
@@ -78,7 +83,7 @@ import { CreateProductionRecordDto, DOWNTIME_LABELS, DowntimeReason, UpdateProdu
                 }
               </mat-form-field>
 
-              <mat-form-field appearance="outline" class="third">
+              <mat-form-field appearance="outline">
                 <mat-label>Давление, bar</mat-label>
                 <input matInput type="number" formControlName="downholePressure" placeholder="250">
                 @if (form.controls.downholePressure.hasError('min') || form.controls.downholePressure.hasError('max')) {
@@ -86,7 +91,7 @@ import { CreateProductionRecordDto, DOWNTIME_LABELS, DowntimeReason, UpdateProdu
                 }
               </mat-form-field>
 
-              <mat-form-field appearance="outline" class="third">
+              <mat-form-field appearance="outline">
                 <mat-label>Температура, °C</mat-label>
                 <input matInput type="number" formControlName="downholeTemperature" placeholder="95">
                 @if (form.controls.downholeTemperature.hasError('min') || form.controls.downholeTemperature.hasError('max')) {
@@ -95,8 +100,10 @@ import { CreateProductionRecordDto, DOWNTIME_LABELS, DowntimeReason, UpdateProdu
               </mat-form-field>
             </div>
 
+            <div class="section">Объёмы за сутки</div>
+
             <div class="row">
-              <mat-form-field appearance="outline" class="third">
+              <mat-form-field appearance="outline">
                 <mat-label>Нефть</mat-label>
                 <input matInput type="number" formControlName="oilVolume" placeholder="100">
                 @if (form.controls.oilVolume.hasError('required')) {
@@ -107,7 +114,7 @@ import { CreateProductionRecordDto, DOWNTIME_LABELS, DowntimeReason, UpdateProdu
                 }
               </mat-form-field>
 
-              <mat-form-field appearance="outline" class="third">
+              <mat-form-field appearance="outline">
                 <mat-label>Газ</mat-label>
                 <input matInput type="number" formControlName="gasVolume" placeholder="300">
                 @if (form.controls.gasVolume.hasError('required')) {
@@ -118,7 +125,7 @@ import { CreateProductionRecordDto, DOWNTIME_LABELS, DowntimeReason, UpdateProdu
                 }
               </mat-form-field>
 
-              <mat-form-field appearance="outline" class="third">
+              <mat-form-field appearance="outline">
                 <mat-label>Вода</mat-label>
                 <input matInput type="number" formControlName="waterVolume" placeholder="50">
                 @if (form.controls.waterVolume.hasError('required')) {
@@ -130,7 +137,7 @@ import { CreateProductionRecordDto, DOWNTIME_LABELS, DowntimeReason, UpdateProdu
               </mat-form-field>
             </div>
 
-            <mat-form-field appearance="outline" class="full">
+            <mat-form-field appearance="outline">
               <mat-label>Объём закачки воды</mat-label>
               <input matInput type="number" formControlName="waterInjectionVolume" placeholder="0">
               @if (form.controls.waterInjectionVolume.hasError('required')) {
@@ -141,13 +148,16 @@ import { CreateProductionRecordDto, DOWNTIME_LABELS, DowntimeReason, UpdateProdu
               }
             </mat-form-field>
 
-            <mat-form-field appearance="outline" class="full">
+            <div class="section">Простой</div>
+
+            <mat-form-field appearance="outline">
               <mat-label>Причина простоя</mat-label>
               <mat-select formControlName="downtimeReason">
                 @for (reason of downtimeReasons; track reason) {
                   <mat-option [value]="reason">{{ DOWNTIME_LABELS[reason] }}</mat-option>
                 }
               </mat-select>
+              <mat-hint>При 24 часах работы простоя нет — поле блокируется автоматически</mat-hint>
             </mat-form-field>
 
             @if (wiWarning()) {
@@ -171,16 +181,30 @@ import { CreateProductionRecordDto, DOWNTIME_LABELS, DowntimeReason, UpdateProdu
     </div>
   `,
   styles: [`
-    .form-wrap { max-width: 720px; }
+    .form-wrap { max-width: 760px; }
     h1 { margin: 0 0 16px; }
-    .form-card { padding: 24px; }
-    .full { width: 100%; margin-bottom: 8px; }
-    .row { display: flex; gap: 16px; }
-    .third { flex: 1; margin-bottom: 8px; }
-    .half { flex: 1; margin-bottom: 8px; }
-    .info-row { display: flex; gap: 16px; margin-bottom: 16px; }
+    .form-card { padding: 28px; }
+    mat-form-field { width: 100%; padding-bottom: 22px; }
+    .row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      column-gap: 16px;
+    }
+    .info-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: 16px;
+    }
+    .section {
+      margin: 4px 0 12px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #607d8b;
+    }
     .center { display: flex; justify-content: center; padding: 32px; }
-    .actions { display: flex; gap: 12px; margin-top: 8px; }
+    .actions { display: flex; gap: 12px; margin-top: 4px; }
     .note {
       background: #e3f0fa;
       color: #0d2b45;
@@ -194,7 +218,7 @@ import { CreateProductionRecordDto, DOWNTIME_LABELS, DowntimeReason, UpdateProdu
       color: #e65100;
       border-radius: 6px;
       padding: 10px 14px;
-      margin-bottom: 12px;
+      margin: 0 0 12px;
       font-size: 14px;
     }
     .server-error {
@@ -204,6 +228,10 @@ import { CreateProductionRecordDto, DOWNTIME_LABELS, DowntimeReason, UpdateProdu
       padding: 10px 14px;
       margin-bottom: 12px;
       font-size: 14px;
+    }
+    @media (max-width: 640px) {
+      .form-card { padding: 20px; }
+      .row, .info-row { grid-template-columns: 1fr; }
     }
   `]
 })
@@ -250,6 +278,8 @@ export class ProductionRecordForm implements OnInit {
   });
 
   ngOnInit(): void {
+    this.form.controls.onStreamHours.valueChanges.subscribe(hours => this.syncDowntime(hours));
+
     this.wellService.getAll().subscribe({
       next: list => {
         this.wells.set(list);
@@ -267,6 +297,15 @@ export class ProductionRecordForm implements OnInit {
     if (well) {
       this.selectedWellType = well.wellType;
       this.checkWiRules();
+    }
+  }
+
+  private syncDowntime(hours: number): void {
+    if (hours === 24) {
+      this.form.controls.downtimeReason.setValue(DowntimeReason.None);
+      this.form.controls.downtimeReason.disable();
+    } else {
+      this.form.controls.downtimeReason.enable();
     }
   }
 
@@ -311,6 +350,9 @@ export class ProductionRecordForm implements OnInit {
           waterInjectionVolume: record.waterInjectionVolume,
           downtimeReason: record.downtimeReason
         });
+
+        this.form.controls.productionDate.disable();
+        this.form.controls.wellId.disable();
 
         this.checkWiRules();
         this.loading.set(false);
